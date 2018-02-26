@@ -1,0 +1,125 @@
+
+<!DOCTYPE html>
+<head>
+<meta charset="utf-8">
+<meta name= "robots" content = "noindex, nofollow" /> 
+<!--
+based on:
+https://github.com/markmarkoh/datamaps/blob/master/src/examples/highmaps_world.html
+
+data is from:
+Liquipedia traffic statistics
+CPC stats (not verified), https://talktopoint.com/google-adsense-cpc-rates-by-country/
+country 3 digit code list: http://www.nationsonline.org/oneworld/country_code_list.htm
+-->
+
+</head>
+<body>
+  <script src="//cdnjs.cloudflare.com/ajax/libs/d3/3.5.3/d3.min.js"></script>
+  <script src="//cdnjs.cloudflare.com/ajax/libs/topojson/1.6.9/topojson.min.js"></script>
+  <script src="//cdnjs.cloudflare.com/ajax/libs/datamaps/0.5.8/datamaps.all.js"></script>
+
+
+#1. Liquipedia exposure/recognizability rating by country:<br />
+Higher number implies that more people per 1000 visit Liquipedia.<br />
+For example, Finland has a much higher rating than Brazil. Yet it brings twice less traffic to LP.
+<div id="container1" style="position: relative; width: 99%; max-height: 1200px;"></div>
+<script>
+    var series = [
+        ["SGP",6.4608],["ISL",5.3708],["SWE",5.0982],["FIN",4.9720],["EST",4.6446],["DNK",4.2236],["PER",3.3506],["NOR",3.3379],["PHL",2.5554],["MYS",2.5458],["LTU",2.4891],["POL",1.9118],["NZL",1.8766],["CAN",1.8136],["PRT",1.7984],["LVA",1.7635],["AUS",1.7399],["CZE",1.6803],["BGR",1.5908],["THA",1.5335],["UKR",1.5313],["HRV",1.5188],["MKD",1.4885],["SVK",1.3821],["IDN",1.2818],["BLR",1.2558],["ROU",1.2513],["AUT",1.2446],["SVN",1.1808],["SRB",1.1492],["DEU",1.1483],["NLD",1.0421],["USA",1.0348],["HKG",0.9523],["GBR",0.9508],["CHE",0.9101],["IRL",0.9087],["HUN",0.8627],["RUS",0.8412],["BRA",0.8349],["BEL",0.7663],["FRA",0.6852],["ISR",0.6474],["KAZ",0.6071],["GRC",0.6016],["BOL",0.5678],["KHM",0.5620],["CYP",0.5612],["URY",0.5408],["CHL",0.5327],["LUX",0.5188],["QAT",0.4782],["TUR",0.4060],["TWN",0.3891],["ARG",0.3665],["ESP",0.3504],["KOR",0.3328],["BHR",0.3229],["CRI",0.2470],["MMR",0.2345],["ECU",0.2276],["ITA",0.2274],["PAN",0.2248],["LBN",0.2119],["ALB",0.1836],["KWT",0.1784],["SAU",0.1728],["JOR",0.1727],["ZAF",0.1272],["PRY",0.1194],["JPN",0.1087],["PRI",0.0910],["PAK",0.0851],["GTM",0.0813],["LKA",0.0802],["MEX",0.0693],["TUN",0.0677],["OMN",0.0674],["COL",0.0662],["VEN",0.0658],["IRN",0.0640],["UZB",0.0627],["CUB",0.0603],["IND",0.0587],["AZE",0.0511],["DZA",0.0500],["DOM",0.0468],["BGD",0.0436],["CHN",0.0291],["IRQ",0.0269],["MAR",0.0233],["EGY",0.0216],["SYR",0.0183],["KEN",0.0044],["NGA",0.0010],["ZZZ",0]		];
+
+    var dataset = {};
+
+    var onlyValues = series.map(function(obj){ return obj[1]; });
+    var minValue = Math.min.apply(null, onlyValues),
+            maxValue = Math.max.apply(null, onlyValues);
+
+    var paletteScale = d3.scale.linear()
+            .domain([minValue,maxValue])
+            .range(["#EFEFFF","#02386F"]); // blue color
+
+    series.forEach(function(item){ //
+        var iso = item[0],
+                value = item[1];
+        dataset[iso] = { numberOfThings: value, fillColor: paletteScale(value) };
+    });
+
+    new Datamap({
+        element: document.getElementById('container1'),
+		height: 1000,
+        fills: { defaultFill: '#F5F5F5' },
+        data: dataset,
+        geographyConfig: {
+            borderColor: '#DEDEDE',
+            highlightBorderWidth: 2,
+            highlightFillColor: function(geo) {
+                return geo['fillColor'] || '#F5F5F5';
+            },
+            highlightBorderColor: '#B7B7B7',
+            popupTemplate: function(geo, data) {
+                if (!data) { return ; }
+                return ['<div class="hoverinfo">',
+                    '<strong>', geo.properties.name, '</strong>',
+                    '<br>Liquipedia exposure: <strong>', data.numberOfThings, '</strong>',
+                    '</div>'].join('');
+            }
+        }
+    });
+</script>
+
+
+
+
+<hr>
+#2. Traffic impact by country. We are taking into account CPC (cost per click) and current traffic from the country to Liquipedia:<br />
+USA is a clear leader with 700 000. It's excluded from the graph to not skew the gradation too much.
+<div id="container2" style="position: relative; width: 99%; max-height: 1200px;"></div>
+<script>
+    var series = [
+        ["DEU",152947],["CAN",131667],["GBR",117894],["AUS",88037],["BRA",58024],["RUS",57540],["SWE",50473],["FRA",46864],["SGP",38765],["PHL",38330],["IDN",36917],["CHN",35580],["POL",32119],["UKR",30626],["MYS",30550],["FIN",24860],["NOR",23365],["PER",21444],["DNK",20273],["NLD",20008],["THA",14722],["AUT",13940],["JPN",11837],["KOR",10950],["ESP",10933],["CHE",10922],["CZE",10586],["IND",10042],["NZL",9758],["PRT",8632],["BEL",8430],["TUR",7958],["ITA",7822],["HKG",6666],["ROU",6006],["IRL",5088],["TWN",4903],["ARG",4838],["ISR",4078],["ZAF",3893],["CHL",3463],["HUN",3451],["KAZ",3400],["EST",3251],["BGR",3182],["SVK",2764],["BLR",2637],["MNG",2589],["HRV",2278],["SAU",2160],["IRN",2149],["LVA",2116],["SRB",2068],["GRC",1925],["MEX",1725],["LTU",1493],["SVN",1417],["PAK",1148],["QAT",1148],["BOL",1022],["KHM",899],["MKD",893],["ISL",671],["MMR",657],["JOR",622],["COL",615],["ECU",614],["KGZ",537],["UZB",501],["KWT",499],["BGD",393],["MDA",336],["URY",324],["GEO",319],["LUX",311],["NPL",306],["VEN",289],["EGY",273],["MLT",259],["OMN",243],["BHR",226],["CYP",224],["CRI",222],["PRI",218],["LBN",212],["LKA",192],["DZA",190],["DOM",168],["GTM",146],["ARM",141],["TUN",122],["MUS",115],["MAR",107],["SYR",103],["PRY",96],["NGA",93],["PAN",90],["MDV",75],["MHL",56],["SLV",51],["PSE",50],["CUB",48],["AND",48],["REU",47],["IRQ",43],["AZE",41],["ALB",37],["GHA",34],["KEN",34],["MDG",33],["GUM",29],["MNE",28],["BHS",27],["MTQ",26],["NIC",26],["HND",24],["CIV",21],["FRO",19],["CMR",18],["MNP",17],["SUR",17],["JAM",15],["GRD",13],["ABW",13],["PYF",12],["MOZ",11],["AGO",10],["NAM",10],["TKM",10],["GUF",9],["BRB",9],["SEN",9],["PNG",9],["AFG",8],["BWA",8],["SDN",7],["CYM",7],["YEM",7],["ETH",7],["TGO",6],["FSM",5],["LBY",5],["TZA",5],["ZWE",5],["NCL",5],["FJI",5],["SOM",5],["RWA",4],["VUT",4],["UGA",3],["BLZ",3],["SYC",3],["BTN",3],["COD",3],["LBR",2],["GRL",2],["ZMB",2],["BFA",2],["DJI",1],["LSO",1],["SWZ",1],["PLW",1],["BEN",1],["SLE",1],["GUY",1],["HTI",1],["BDI",0],["GMB",0],["WSM",0],["CAF",0],["DMA",0],["ASM",0],["COG",0],["GNQ",0],["MWI",0],["COK",0],["GIN",0],["TON",0],["IOT",0],["SLB",0],["KIR",0],["ZZZ",0]		];
+
+    var dataset = {};
+
+    var onlyValues = series.map(function(obj){ return obj[1]; });
+    var minValue = Math.min.apply(null, onlyValues),
+            maxValue = Math.max.apply(null, onlyValues);
+
+    var paletteScale = d3.scale.linear()
+            .domain([minValue,maxValue])
+			//.range(["white","green"]);
+            .range(["#EFEFFF","#02386F"]); // blue color
+
+    series.forEach(function(item){ //
+        var iso = item[0],
+                value = item[1];
+        dataset[iso] = { numberOfThings: value, fillColor: paletteScale(value) };
+    });
+
+    new Datamap({
+        element: document.getElementById('container2'),
+		height: 1000,
+        fills: { defaultFill: '#F5F5F5' },
+        data: dataset,
+        geographyConfig: {
+            borderColor: '#DEDEDE',
+            highlightBorderWidth: 2,
+            highlightFillColor: function(geo) {
+                return geo['fillColor'] || '#F5F5F5';
+            },
+            highlightBorderColor: '#B7B7B7',
+            popupTemplate: function(geo, data) {
+                if (!data) { return ; }
+                // tooltip content
+                return ['<div class="hoverinfo">',
+                    '<strong>', geo.properties.name, '</strong>',
+                    '<br>Current traffic impact: <strong>', data.numberOfThings, '</strong>',
+                    '</div>'].join('');
+            }
+        }
+    });
+</script>
+<hr>
+#3. Countries where Liquipedia is doing significantly worse or better than average<br />
+<!--
+
+</body>
